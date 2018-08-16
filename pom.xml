@@ -1,0 +1,586 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.kelly</groupId>
+    <artifactId>mybatis-generator-swagger</artifactId>
+    <version>0.8.4</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        
+		<clirr.comparisonVersion>1.3.2</clirr.comparisonVersion>
+		<hsqldb.version>2.4.1</hsqldb.version>
+		
+		<java.version>1.8</java.version>
+		<swagger2markup.version>1.0.0</swagger2markup.version>
+
+		<maven.compiler.plugin>3.3</maven.compiler.plugin>
+		<maven.jar.plugin>2.4</maven.jar.plugin>
+		<maven.resources.plugin>2.7</maven.resources.plugin>
+		<asciidoctor.maven.plugin>1.5.6</asciidoctor.maven.plugin>
+		<asciidoctorj.pdf.version>1.5.0-alpha.16</asciidoctorj.pdf.version>
+		<asciidoctorj.epub3.version>1.5.0-alpha.6</asciidoctorj.epub3.version>
+
+		<!-- <swagger.input>${swagger.output.dir}/swagger.json</swagger.input> -->
+		<!-- <swagger.input>http://127.0.0.1:88/v2/api-docs</swagger.input> -->
+		<swagger.input>http://192.168.213.135:88/v2/api-docs</swagger.input>
+		<swagger.output.dir>${project.build.directory}/classes</swagger.output.dir>
+		<swagger.snippetOutput.dir>${project.build.directory}/asciidoc/snippets</swagger.snippetOutput.dir>
+
+		<generated.asciidoc.directory>${project.build.directory}/asciidoc/generated</generated.asciidoc.directory>
+		<asciidoctor.input.directory>${project.basedir}/src/main/asciidoc</asciidoctor.input.directory>
+		<asciidoctor.html.output.directory>${project.build.directory}/asciidoc/html</asciidoctor.html.output.directory>
+		<asciidoctor.pdf.output.directory>${project.build.directory}/asciidoc/pdf</asciidoctor.pdf.output.directory>
+		<asciidoctor.epub3.output.directory>${project.build.directory}/asciidoc/epub3</asciidoctor.epub3.output.directory>
+		<asciidoctor.docbook.output.directory>${project.build.directory}/asciidoc/docbook</asciidoctor.docbook.output.directory>
+    </properties>
+    
+    <pluginRepositories>
+		<pluginRepository>
+			<id>aliyun</id>
+			<name>aliyun</name>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>jcenter-snapshots</id>
+			<name>jcenter</name>
+			<url>http://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>jcenter-releases</id>
+			<name>jcenter</name>
+			<url>http://jcenter.bintray.com</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<repositories>
+		<repository>
+			<id>aliyun</id>
+			<name>aliyun</name>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>jcentral</id>
+			<name>bintray</name>
+			<url>http://jcenter.bintray.com</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>jcenter-snapshots</id>
+			<name>jcenter</name>
+			<url>http://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
+		</repository>
+	</repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.8.11.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+        
+        <!-- mybatis generator -->
+		<dependency>
+			<groupId>oracle</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.2.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.38</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.25</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.10.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${hsqldb.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>3.5.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>3.5.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<version>3.5.4</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis2</artifactId>
+			<version>2.3.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>3.1.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>3.1.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>3.1.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.4.6</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.javaparser</groupId>
+			<artifactId>javaparser-core</artifactId>
+			<version>3.6.12</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mybatis.dynamic-sql</groupId>
+			<artifactId>mybatis-dynamic-sql</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		
+		<!-- asciidoctor相关 -->
+		<dependency>
+		    <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj</artifactId>
+            <version>1.5.6</version>
+		</dependency>
+		<dependency>
+	      <groupId>org.jruby</groupId>
+	      <artifactId>jruby-complete</artifactId>
+	      <version>1.7.26</version>
+	      <scope>runtime</scope>
+       </dependency>
+	    <dependency>
+	      <groupId>com.beust</groupId>
+	      <artifactId>jcommander</artifactId>
+	      <version>1.35</version>
+	      <scope>runtime</scope>
+	    </dependency>
+        <dependency>
+			<groupId>org.asciidoctor</groupId>
+			<artifactId>asciidoctorj-pdf</artifactId>
+			<version>${asciidoctorj.pdf.version}</version>
+        </dependency>
+		<dependency>
+			<groupId>org.asciidoctor</groupId>
+			<artifactId>asciidoctorj-epub3</artifactId>
+			<version>${asciidoctorj.epub3.version}</version>
+		</dependency>
+		
+    </dependencies>
+
+        
+    <build>
+        <plugins>
+            <!-- 公共插件 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven.compiler.plugin}</version>
+				<configuration>
+					<compilerVersion>${java.version}</compilerVersion>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<encoding>UTF-8</encoding>
+					<!-- prevents endPosTable exception for maven compile -->
+					<useIncrementalCompilation>false</useIncrementalCompilation>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.mybatis.generator.api.ShellRunner</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			
+			<!-- api文档插件 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<io.springfox.staticdocs.outputDir>${swagger.output.dir}</io.springfox.staticdocs.outputDir>
+						<io.springfox.staticdocs.snippetsOutputDir>${swagger.snippetOutput.dir}
+						</io.springfox.staticdocs.snippetsOutputDir>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+
+			<!-- First, use the swagger2markup plugin to generate asciidoc -->
+			<plugin>
+				<groupId>io.github.swagger2markup</groupId>
+				<artifactId>swagger2markup-maven-plugin</artifactId>
+				<version>${swagger2markup.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>io.github.swagger2markup</groupId>
+						<artifactId>swagger2markup-import-files-ext</artifactId>
+						<version>${swagger2markup.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>io.github.swagger2markup</groupId>
+						<artifactId>swagger2markup-spring-restdocs-ext</artifactId>
+						<version>${swagger2markup.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<swaggerInput>${swagger.input}</swaggerInput>
+					<outputDir>${generated.asciidoc.directory}</outputDir>
+					<config>
+						<swagger2markup.markupLanguage>ASCIIDOC</swagger2markup.markupLanguage>
+						<!--如果API中没有TAG则改写为AS-IS或不写这行 <swagger2markup.pathsGroupedBy>AS-IS</swagger2markup.pathsGroupedBy> -->
+						<swagger2markup.extensions.dynamicOverview.contentPath>${project.basedir}/src/docs/asciidoc/extensions/overview</swagger2markup.extensions.dynamicOverview.contentPath>
+						<swagger2markup.extensions.dynamicDefinitions.contentPath>${project.basedir}/src/docs/asciidoc/extensions/definitions</swagger2markup.extensions.dynamicDefinitions.contentPath>
+						<swagger2markup.extensions.dynamicPaths.contentPath>${project.basedir}/src/docs/asciidoc/extensions/paths</swagger2markup.extensions.dynamicPaths.contentPath>
+						<swagger2markup.extensions.dynamicSecurity.contentPath>${project.basedir}src/docs/asciidoc/extensions/security/</swagger2markup.extensions.dynamicSecurity.contentPath>
+						<swagger2markup.extensions.springRestDocs.snippetBaseUri>${swagger.snippetOutput.dir}</swagger2markup.extensions.springRestDocs.snippetBaseUri>
+						<swagger2markup.extensions.springRestDocs.defaultSnippets>false</swagger2markup.extensions.springRestDocs.defaultSnippets>
+					</config>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>convertSwagger2markup</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Run the generated asciidoc through Asciidoctor to generate other 
+				documentation types, such as PDFs or HTML5 -->
+			<plugin>
+				<groupId>org.asciidoctor</groupId>
+				<artifactId>asciidoctor-maven-plugin</artifactId>
+				<version>${asciidoctor.maven.plugin}</version>
+				<!-- Include Asciidoctor PDF for pdf generation -->
+				<dependencies>
+					<dependency>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctorj-pdf</artifactId>
+						<version>${asciidoctorj.pdf.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.asciidoctor</groupId>
+						<artifactId>asciidoctorj-epub3</artifactId>
+						<version>${asciidoctorj.epub3.version}</version>
+					</dependency>
+				</dependencies>
+				<!-- Configure generic document generation settings -->
+				<configuration>
+					<!--defaults to ${basedir}/src/main/asciidoc -->
+					<sourceDirectory>${asciidoctor.input.directory}</sourceDirectory>
+					<!--an override to process a single source file; defaults to all files 
+						in ${sourceDirectory} -->
+					<sourceDocumentName>API document.adoc</sourceDocumentName>
+					<!--enables and sets the source highlighter; currently coderay and highlightjs 
+						are supported -->
+					<sourceHighlighter>coderay</sourceHighlighter>
+					<!--a Map<String,String> of attributes to pass to Asciidoctor, defaults 
+						to null -->
+					<attributes>
+						<doctype>book</doctype>
+						<toc>left</toc>
+						<toclevels>3</toclevels>
+						<numbered></numbered>
+						<hardbreaks></hardbreaks>
+						<sectlinks></sectlinks>
+						<sectanchors></sectanchors>
+						<generated>${generated.asciidoc.directory}</generated>
+					</attributes>
+				</configuration>
+				<!-- Since each execution can only handle one backend, run separate executions 
+					for each desired output type -->
+				<executions>
+					<execution>
+						<id>output-html</id>
+						<phase>test</phase>
+						<goals>
+							<goal>process-asciidoc</goal>
+						</goals>
+						<configuration>
+							<backend>html5</backend>
+							<outputDirectory>${asciidoctor.html.output.directory}</outputDirectory>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>output-pdf</id>
+						<phase>test</phase>
+						<goals>
+							<goal>process-asciidoc</goal>
+						</goals>
+						<configuration>
+							<backend>pdf</backend>
+							<outputDirectory>${asciidoctor.pdf.output.directory}</outputDirectory>
+							<attributes>
+								<pdf-stylesdir>${project.basedir}/src/theme</pdf-stylesdir>
+								<pdf-style>custom</pdf-style>
+								<pdf-fontsdir>${project.basedir}/src/fonts</pdf-fontsdir>
+								<icons>font</icons>
+								<pagenums />
+								<toc />
+								<idprefix />
+								<idseparator>-</idseparator>
+							</attributes>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>output-epub3</id>
+						<phase>test</phase>
+						<goals>
+							<goal>process-asciidoc</goal>
+						</goals>
+						<configuration>
+							<backend>epub3</backend>
+							<outputDirectory>${asciidoctor.epub3.output.directory}</outputDirectory>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>output-docbook</id>
+						<phase>test</phase>
+						<goals>
+							<goal>process-asciidoc</goal>
+						</goals>
+						<configuration>
+							<backend>docbook</backend>
+							<outputDirectory>${asciidoctor.docbook.output.directory}</outputDirectory>
+						</configuration>
+					</execution>
+
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<!-- copy dependencies to the lib directory -->
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- copy the generated documents -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>${maven.resources.plugin}</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/static/docs</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${asciidoctor.html.output.directory}</directory>
+								</resource>
+								<resource>
+									<directory>${asciidoctor.pdf.output.directory}</directory>
+								</resource>
+								<resource>
+									<directory>${asciidoctor.epub3.output.directory}</directory>
+								</resource>
+								<resource>
+									<directory>${asciidoctor.docbook.output.directory}</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- javaFx插件 -->
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.8.3</version>
+                <configuration>
+                    <mainClass>com.zzg.mybatis.generator.MainUI</mainClass>
+                    <vendor>Owen Zou</vendor>
+                    <verbose>false</verbose>
+                    <jfxMainAppJarName>mybatis-generator-gui.jar</jfxMainAppJarName>
+                    <needShortcut>true</needShortcut>
+                    <needMenu>true</needMenu>
+                    <copyAdditionalAppResourcesToJar>true</copyAdditionalAppResourcesToJar>
+                    <additionalAppResources>${project.basedir}/src/main/resources</additionalAppResources>
+                </configuration>
+            </plugin>
+            
+           <!-- 以下是mybatis生成代码插件 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>${project.basedir}/src/main/assembly/src.xml</descriptor>
+					</descriptors>
+					<!-- 这里不指定为false打包会生成两个jar包,我们要用的那个jar包命名很乱,后面加了 jar-with-dependencies,不喜欢,直接禁用掉 -->
+					<appendAssemblyId>false</appendAssemblyId>
+					<archive>
+						<manifest>
+							<!-- 指定类的全路径 否则运行会报找不到main class的错误 -->
+							<mainClass>org.mybatis.generator.api.ShellRunner</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>bundle</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<configuration>
+					<signature>
+						<groupId>org.codehaus.mojo.signature</groupId>
+						<artifactId>java18</artifactId>
+						<version>1.0</version>
+					</signature>
+				</configuration>
+			</plugin>
+        </plugins>
+    </build>
+</project>
