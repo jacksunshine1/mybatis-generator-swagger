@@ -1,0 +1,2 @@
+# mybatis-generator-swagger
+mybatis自动生成实体并带有注释和swagger自动生成api文档
