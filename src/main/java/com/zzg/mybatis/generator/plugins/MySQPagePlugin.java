@@ -49,11 +49,11 @@ public class MySQPagePlugin extends PluginAdapter {
         getPageSize.addBodyLine("return pageSize;");
         topLevelClass.addMethod(getPageSize);
 
-        Field offset = new Field();
-        offset.setName("offset");
-        offset.setVisibility(JavaVisibility.PRIVATE);
-        offset.setType(integerWrapper);
-        topLevelClass.addField(offset);
+        Field pageNumber = new Field();
+        pageNumber.setName("pageNumber");
+        pageNumber.setVisibility(JavaVisibility.PRIVATE);
+        pageNumber.setType(integerWrapper);
+        topLevelClass.addField(pageNumber);
 
         Method setPageNumber = new Method();
         setPageNumber.setVisibility(JavaVisibility.PUBLIC);
