@@ -64,7 +64,11 @@ public class MybatisGeneratorBridge {
         TableConfiguration tableConfig = new TableConfiguration(context);
         tableConfig.setTableName(generatorConfig.getTableName());
         tableConfig.setDomainObjectName(generatorConfig.getDomainObjectName());
-
+        tableConfig.setSelectByPrimaryKeyStatementEnabled(true);
+        tableConfig.setDeleteByPrimaryKeyStatementEnabled(true);
+        tableConfig.setUpdateByPrimaryKeyStatementEnabled(true);
+        tableConfig.setInsertStatementEnabled(true);
+        tableConfig.setSchema("public");
         // 针对 postgresql 单独配置
         if (DbType.valueOf(selectedDatabaseConfig.getDbType()).getDriverClass() == "org.postgresql.Driver") {
             tableConfig.setDelimitIdentifiers(true);
@@ -75,6 +79,7 @@ public class MybatisGeneratorBridge {
 			tableConfig.setGeneratedKey(new GeneratedKey(generatorConfig.getGenerateKeys(), selectedDatabaseConfig.getDbType(), true, null));
 		}
 
+	
         if (generatorConfig.getMapperName() != null) {
             tableConfig.setMapperName(generatorConfig.getMapperName());
         }
@@ -156,11 +161,16 @@ public class MybatisGeneratorBridge {
         }
         // limit/offset插件
         if (generatorConfig.isOffsetLimit()) {
-            if (DbType.MySQL.name().equals(selectedDatabaseConfig.getDbType())
-		            || DbType.PostgreSQL.name().equals(selectedDatabaseConfig.getDbType())) {
+            if (DbType.MySQL.name().equals(selectedDatabaseConfig.getDbType())) {
                 PluginConfiguration pluginConfiguration = new PluginConfiguration();
-                pluginConfiguration.addProperty("type", "com.zzg.mybatis.generator.plugins.MySQLLimitPlugin");
-                pluginConfiguration.setConfigurationType("com.zzg.mybatis.generator.plugins.MySQLLimitPlugin");
+                pluginConfiguration.addProperty("type", "com.zzg.mybatis.generator.plugins.MySQPagePlugin");
+                pluginConfiguration.setConfigurationType("com.zzg.mybatis.generator.plugins.MySQPagePlugin");
+                context.addPluginConfiguration(pluginConfiguration);
+            }
+            if(DbType.PostgreSQL.name().equals(selectedDatabaseConfig.getDbType())){
+                PluginConfiguration pluginConfiguration = new PluginConfiguration();
+                pluginConfiguration.addProperty("type", "com.zzg.mybatis.generator.plugins.PostgreSQLPagePlugin");
+                pluginConfiguration.setConfigurationType("com.zzg.mybatis.generator.plugins.PostgreSQLPagePlugin");
                 context.addPluginConfiguration(pluginConfiguration);
             }
         }
@@ -175,11 +185,12 @@ public class MybatisGeneratorBridge {
             1，MyBatis3：默认的值，生成基于MyBatis3.x以上版本的内容，包括XXXBySample；
             2，MyBatis3Simple：类似MyBatis3，只是不生成XXXBySample；
          **/
-        context.setTargetRuntime("MyBatis3Simple");
+        context.setTargetRuntime("MyBatis3");
 
         List<String> warnings = new ArrayList<>();
         Set<String> fullyqualifiedTables = new HashSet<>();
         Set<String> contexts = new HashSet<>();
+        contexts.add(context.getId());
         ShellCallback shellCallback = new DefaultShellCallback(true); // override=true
         MyBatisGenerator myBatisGenerator = new MyBatisGenerator(configuration, shellCallback, warnings);
         myBatisGenerator.generate(progressCallback, contexts, fullyqualifiedTables);
