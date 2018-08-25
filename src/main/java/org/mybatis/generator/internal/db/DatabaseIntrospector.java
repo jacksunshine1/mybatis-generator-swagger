@@ -39,6 +39,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mybatis.generator.api.FullyQualifiedTable;
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -71,6 +72,13 @@ public class DatabaseIntrospector {
     private Context context;
 
     private Log logger;
+    
+    /**
+     *  新增 连接的数据库名称，MYSQL or Oracle or  Postgresql
+     * 用于提取不同数据库的备注信息
+     */
+    private String databaseProductName;
+    
 
     public DatabaseIntrospector(Context context,
             DatabaseMetaData databaseMetaData,
@@ -81,6 +89,14 @@ public class DatabaseIntrospector {
         this.javaTypeResolver = javaTypeResolver;
         this.warnings = warnings;
         logger = LogFactory.getLog(getClass());
+        
+        // 新增
+        try {
+            DatabaseMetaData md = databaseMetaData.getConnection().getMetaData();
+            databaseProductName = md.getDatabaseProductName().toUpperCase();
+        } catch (SQLException se) {
+            warnings.add("获取数据库版本失败:" + se.getMessage());
+        }
     }
 
     private void calculatePrimaryKey(FullyQualifiedTable table,
@@ -539,6 +555,37 @@ public class DatabaseIntrospector {
             introspectedColumn.setRemarks(rs.getString("REMARKS")); //$NON-NLS-1$
             introspectedColumn.setDefaultValue(rs.getString("COLUMN_DEF")); //$NON-NLS-1$
 
+            // 新增
+            if ("ORACLE".equals(databaseProductName)) {
+                //start oracle,获取oracle的表备注
+                Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                ResultSet mrs = stmt.executeQuery(
+                        new StringBuilder()
+                                .append("select * from user_col_comments where Table_Name='")
+                                .append(tc.getTableName() + "' AND COLUMN_NAME='")
+                                .append(rs.getString("COLUMN_NAME") + "'")
+                                .toString());
+                while (mrs.next())
+                    introspectedColumn.setRemarks(mrs.getString("COMMENTS"));
+                closeResultSet(mrs);
+                stmt.close();
+                //end
+            }  if ("POSTGRESQL".equals(databaseProductName)) {
+                //start postgresql,获取postgresql的表备注
+                Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                ResultSet mrs = stmt.executeQuery(
+                        new StringBuilder()
+                        .append("select relname as tabname,cast(obj_description(relfilenode,'pg_class') as varchar) as comment from pg_class c where  relname ='")
+                        .append(StringUtils.substringAfterLast(tc.getTableName() ,".")+ "' ")
+                         .toString());
+                while (mrs.next())
+                    introspectedColumn.setRemarks(mrs.getString("comment"));
+                closeResultSet(mrs);
+                stmt.close();
+                //end
+            } else if ("SQLSERVER".equals(databaseProductName)) {
+            }
+            
             if (supportsIsAutoIncrement) {
                 introspectedColumn.setAutoIncrement(
                         "YES".equals(rs.getString("IS_AUTOINCREMENT"))); //$NON-NLS-1$ //$NON-NLS-2$
@@ -601,7 +648,7 @@ public class DatabaseIntrospector {
 
     private List<IntrospectedTable> calculateIntrospectedTables(
             TableConfiguration tc,
-            Map<ActualTableName, List<IntrospectedColumn>> columns) {
+            Map<ActualTableName, List<IntrospectedColumn>> columns) throws SQLException {
         boolean delimitIdentifiers = tc.isDelimitIdentifiers()
                 || stringContainsSpace(tc.getCatalog())
                 || stringContainsSpace(tc.getSchema())
@@ -634,24 +681,41 @@ public class DatabaseIntrospector {
                     tc.getDomainObjectRenamingRule(),
                     context);
 
-            //设置数据库表的备注信息
-            Statement stmt;
-            try {
-                String type = databaseMetaData.getDatabaseProductVersion().toLowerCase();
-                if(type.contains("mysql")){
-                    stmt = databaseMetaData.getConnection().createStatement();
-                    ResultSet rs = stmt.executeQuery("SHOW TABLE STATUS LIKE '" + atn.getTableName()+"'");
-                    while (rs.next()) {
-                        //将数据库表得备注信息设置到remark字段
-                        table.setRemarks(rs.getString("COMMENT"));
-                    }
-                    closeResultSet(rs);
-                    if(stmt!=null){
-                        stmt.close();
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+            
+            // 新增 设置数据库表的备注信息
+            if ("MYSQL".equals(databaseProductName)) {
+                //设置数据库表的备注信息
+                //start mysql
+                Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                ResultSet rs = stmt.executeQuery(new StringBuilder().append("SHOW TABLE STATUS LIKE '").append(atn.getTableName()).append("'").toString());
+                while (rs.next())
+                    table.setRemarks(rs.getString("COMMENT"));
+                closeResultSet(rs);
+                stmt.close();
+                //end
+            } else if ("ORACLE".equals(databaseProductName)) {
+                //start oracle,获取oracle的库备注
+                Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                ResultSet rs = stmt.executeQuery(new StringBuilder().append("select * from user_tab_comments where Table_Name Like '").append(atn.getTableName()).append("'").toString());
+                while (rs.next())
+                    table.setRemarks(rs.getString("COMMENTS"));
+                closeResultSet(rs);
+                stmt.close();
+                //end
+            }  if ("POSTGRESQL".equals(databaseProductName)) {
+                //start postgresql,获取postgresql的表备注
+                Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                ResultSet mrs = stmt.executeQuery(
+                        new StringBuilder()
+                        .append("select relname as tabname,cast(obj_description(relfilenode,'pg_class') as varchar) as comment from pg_class c where  relname ='")
+                        .append(StringUtils.substringAfterLast(tc.getTableName() ,".")+ "' ")
+                         .toString());
+                while (mrs.next())
+                     table.setRemarks(mrs.getString("comment"));
+                closeResultSet(mrs);
+                stmt.close();
+                //end
+            } else if ("SQLSERVER".equals(databaseProductName)) {
             }
             
             IntrospectedTable introspectedTable = ObjectFactory
@@ -685,9 +749,61 @@ public class DatabaseIntrospector {
 
             ResultSet rs = databaseMetaData.getTables(fqt.getIntrospectedCatalog(), fqt.getIntrospectedSchema(),
                     fqt.getIntrospectedTableName(), null);
-            if (rs.next()) {
-                String remarks = rs.getString("REMARKS"); //$NON-NLS-1$
-                String tableType = rs.getString("TABLE_TYPE"); //$NON-NLS-1$
+//            if (rs.next()) {
+//                String remarks = rs.getString("REMARKS"); //$NON-NLS-1$
+//                String tableType = rs.getString("TABLE_TYPE"); //$NON-NLS-1$
+//                introspectedTable.setRemarks(remarks);
+//                introspectedTable.setTableType(tableType);
+//            }
+            // 新增
+            while (rs.next()) {
+                String tableType = rs.getString("TABLE_TYPE");
+                String remarks = rs.getString("REMARKS");
+                if (remarks == null || remarks.isEmpty()) {
+                    if ("ORACLE".equals(databaseProductName)) {
+                        //start oracle,获取oracle的库备注
+                        Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                        ResultSet mrs = stmt.executeQuery(
+                                new StringBuilder()
+                                        .append("select * from user_tab_comments where Table_Name Like '")
+                                        .append(introspectedTable.getFullyQualifiedTable().getIntrospectedTableName())
+                                        .append("'")
+                                        .toString());
+                        while (mrs.next())
+                            remarks = mrs.getString("COMMENTS");
+                        closeResultSet(mrs);
+                        stmt.close();
+                        //end
+                    } else if ("MYSQL".equals(databaseProductName)) {
+                        //设置数据库表的备注信息
+                        //start mysql
+                        Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                        ResultSet nrs = stmt.executeQuery(
+                                new StringBuilder()
+                                        .append("SHOW FULL COLUMNS FROM ")
+                                        .append(introspectedTable.getFullyQualifiedTable().getIntrospectedTableName())
+                                        .toString());
+                        while (nrs.next())
+                            remarks = nrs.getString("COMMENT");
+                        closeResultSet(nrs);
+                        stmt.close();
+                        //end
+                    }  if ("POSTGRESQL".equals(databaseProductName)) {
+                        //start postgresql,获取postgresql的表备注
+                        Statement stmt = this.databaseMetaData.getConnection().createStatement();
+                        ResultSet mrs = stmt.executeQuery(
+                                new StringBuilder()
+                                .append("select relname as tabname,cast(obj_description(relfilenode,'pg_class') as varchar) as comment from pg_class c where  relname ='")
+                                .append(StringUtils.substringAfterLast(introspectedTable.getFullyQualifiedTable().toString(), ".") + "' ")
+                                 .toString());
+                        while (mrs.next())
+                            remarks = mrs.getString("comment");
+                        closeResultSet(mrs);
+                        stmt.close();
+                        //end
+                    } else if ("SQLSERVER".equals(databaseProductName)) {
+                    }
+                }
                 introspectedTable.setRemarks(remarks);
                 introspectedTable.setTableType(tableType);
             }

@@ -61,6 +61,20 @@ public class Interface extends InnerInterface implements CompilationUnit {
         }
     }
 
+    /**
+     * 新增 清空
+     */
+    public void clearImportedTypes() {
+        this.importedTypes.clear();
+    }
+    
+    /**
+     * 新增 清空方法
+     */
+    public void clearMethod() {
+        methods.clear();
+    }
+    
     @Override
     public String getFormattedContent() {
 

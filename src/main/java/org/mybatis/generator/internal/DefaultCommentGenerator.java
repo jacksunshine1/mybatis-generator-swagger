@@ -66,6 +66,9 @@ public class DefaultCommentGenerator implements CommentGenerator {
 
     /** 时间格式 **/
     private SimpleDateFormat dateFormat;
+    
+    // 新增 添加作者配置
+    private String author;
 
     /**
      * 构造方法
@@ -162,6 +165,12 @@ public class DefaultCommentGenerator implements CommentGenerator {
         String dateFormatString = properties.getProperty(PropertyRegistry.COMMENT_GENERATOR_DATE_FORMAT);
         if (StringUtility.stringHasValue(dateFormatString)) {
             dateFormat = new SimpleDateFormat(dateFormatString);
+        }
+        
+        //添加作者配置
+        String authorString = properties.getProperty(PropertyRegistry.COMMENT_GENERATOR_AUTHOR);
+        if (StringUtility.stringHasValue(authorString)) {
+            author = authorString;
         }
     }
 
@@ -321,6 +330,21 @@ public class DefaultCommentGenerator implements CommentGenerator {
 //        topLevelClass.addJavaDocLine(sb.toString());
 //
 //        topLevelClass.addJavaDocLine(" */"); //$NON-NLS-1$
+        
+      //重新写方法从数据库中获取表备注的信息
+        String remarks = introspectedTable.getFullyQualifiedTable().getRemarks();
+        //获取实体类名称
+        String entityName = introspectedTable.getFullyQualifiedTable().getDomainObjectName();
+        StringBuilder sb = new StringBuilder();
+        
+        //添加导入类的信息
+//        topLevelClass.addJavaDocLine("import org.springframework.format.annotation.DateTimeFormat;"); 
+//        topLevelClass.addJavaDocLine("import com.fasterxml.jackson.annotation.JsonFormat;");
+        topLevelClass.addJavaDocLine("import io.swagger.annotations.ApiModel;");
+        topLevelClass.addJavaDocLine("import io.swagger.annotations.ApiModelProperty;");
+        
+      
+        topLevelClass.addJavaDocLine("@ApiModel(value =\"" + entityName + "\")");
     }
 
     /** 
@@ -388,6 +412,14 @@ public class DefaultCommentGenerator implements CommentGenerator {
         field.addJavaDocLine("/**");
         field.addJavaDocLine(" * @Fields "+field.getName()+" "+(StringUtils.isNotBlank(introspectedColumn.getRemarks())?introspectedColumn.getRemarks():""));
         field.addJavaDocLine(" */");
+        //字段备注信息
+        field.addJavaDocLine("@ApiModelProperty(value = \"" + (StringUtils.isNotBlank(introspectedColumn.getRemarks())?introspectedColumn.getRemarks():"") + "\")");
+        
+        //当字段数据类型为date时添加日期注释
+//        StringBuffer sb = new StringBuffer();
+//        if(introspectedColumn.getJdbcType() == 93) {
+//            sb.append("@DateTimeFormat(pattern = \"yyyy-MM-dd HH:mm:ss\")");
+//        }
     }
 
     /** 

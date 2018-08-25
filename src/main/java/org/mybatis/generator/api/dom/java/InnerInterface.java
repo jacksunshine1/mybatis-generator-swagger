@@ -45,7 +45,7 @@ public class InnerInterface extends JavaElement {
     private Set<FullyQualifiedJavaType> superInterfaceTypes;
 
     /** The methods. */
-    private List<Method> methods;
+    protected List<Method> methods;
 
     /**
      * Instantiates a new interface.
@@ -196,6 +196,14 @@ public class InnerInterface extends JavaElement {
     public void addMethod(Method method) {
         methods.add(method);
     }
+    
+    /**
+     * 新增 清空方法
+     */
+    public void clearMethod() {
+        methods.clear();
+    }
+    
 
     /**
      * Gets the type.

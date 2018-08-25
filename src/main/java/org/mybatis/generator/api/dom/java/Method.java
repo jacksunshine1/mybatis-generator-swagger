@@ -124,6 +124,11 @@ public class Method extends JavaElement {
         bodyLines.add(line);
     }
 
+    // 新增
+    public void removeAllBodyLines() {
+        bodyLines.clear();
+    }
+    
     /**
      * Adds the body line.
      *

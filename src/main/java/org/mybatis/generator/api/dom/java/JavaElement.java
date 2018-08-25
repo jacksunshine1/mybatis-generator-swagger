@@ -85,6 +85,11 @@ public abstract class JavaElement {
         javaDocLines.add(javaDocLine);
     }
 
+    // 新增
+    public void removeAnnotation() {
+        annotations.clear();
+    }
+    
     /**
      * Gets the annotations.
      *

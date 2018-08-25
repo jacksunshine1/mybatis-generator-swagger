@@ -97,6 +97,7 @@ public class MybatisGeneratorBridge {
         if (generatorConfig.isUseActualColumnNames()) {
 			tableConfig.addProperty("useActualColumnNames", "true");
         }
+       
         JDBCConnectionConfiguration jdbcConfig = new JDBCConnectionConfiguration();
         jdbcConfig.setDriverClass(DbType.valueOf(selectedDatabaseConfig.getDbType()).getDriverClass());
         jdbcConfig.setConnectionURL(DbUtil.getConnectionUrlWithSchema(selectedDatabaseConfig));
@@ -129,6 +130,8 @@ public class MybatisGeneratorBridge {
         commentConfig.setConfigurationType(DefaultCommentGenerator.class.getName());
         if (generatorConfig.isComment()) {
             commentConfig.addProperty("columnRemarks", "true");
+            commentConfig.addProperty("addRemarkComments", "true");
+            commentConfig.addProperty("author", "think");
         }
         if (generatorConfig.isAnnotation()) {
             commentConfig.addProperty("annotations", "true");
@@ -148,6 +151,32 @@ public class MybatisGeneratorBridge {
         exampleRenamePluginConfiguration.addProperty("searchString", "Example$");
         exampleRenamePluginConfiguration.addProperty("replaceString", "Criteria");
         context.addPluginConfiguration(exampleRenamePluginConfiguration);
+        
+        // 统一Mapper 接口插件
+        PluginConfiguration mapperPluginConfiguration = new PluginConfiguration();
+        mapperPluginConfiguration.addProperty("type", "org.mybatis.generator.plugins.MapperPlugin");
+        mapperPluginConfiguration.setConfigurationType("org.mybatis.generator.plugins.MapperPlugin");
+        mapperPluginConfiguration.addProperty("interfaceName", "IMapper");
+        mapperPluginConfiguration.addProperty("deleteMethod", "true");
+        context.addPluginConfiguration(mapperPluginConfiguration);
+        // service层插件
+        PluginConfiguration servicePluginConfiguration = new PluginConfiguration();
+        servicePluginConfiguration.addProperty("type", "org.mybatis.generator.plugins.MybatisServicePlugin");
+        servicePluginConfiguration.setConfigurationType("org.mybatis.generator.plugins.MybatisServicePlugin");
+        
+        servicePluginConfiguration.addProperty("targetProject", generatorConfig.getProjectFolder() + "/" + "src/main/java");
+        servicePluginConfiguration.addProperty("targetPackage", "com.sensenets.sinopec.buiness.service");
+        servicePluginConfiguration.addProperty("implementationPackage", "com.sensenets.sinopec.buiness.service.impl");
+        servicePluginConfiguration.addProperty("enableInsert", "true");
+        servicePluginConfiguration.addProperty("enableUpdateByExampleSelective", "true");
+        servicePluginConfiguration.addProperty("enableInsertSelective", "true");
+        servicePluginConfiguration.addProperty("enableUpdateByPrimaryKey", "true");
+        servicePluginConfiguration.addProperty("enableDeleteByPrimaryKey", "true");
+        servicePluginConfiguration.addProperty("enableDeleteByExample", "true");
+        servicePluginConfiguration.addProperty("enableUpdateByPrimaryKeySelective", "true");
+        servicePluginConfiguration.addProperty("enableUpdateByExample", "true");
+        context.addPluginConfiguration(servicePluginConfiguration);
+        
         // toString, hashCode, equals插件
         if (generatorConfig.isNeedToStringHashcodeEquals()) {
             PluginConfiguration pluginConfiguration1 = new PluginConfiguration();

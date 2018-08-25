@@ -175,6 +175,14 @@ public class FullyQualifiedJavaType implements
     public String getPackageName() {
         return packageName;
     }
+    
+
+    /**
+     *  新增 取消泛型
+     */
+    public void clearTypeArgument() {
+        typeArguments.clear();
+    }
 
     /**
      * Gets the short name.
