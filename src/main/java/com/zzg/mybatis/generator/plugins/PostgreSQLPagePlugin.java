@@ -71,30 +71,30 @@ public class PostgreSQLPagePlugin extends PluginAdapter {
         return true;
     }
 
-    /**
-     * 为Mapper.xml的selectByExample添加pageSize
-     */
-    @Override
-    public boolean sqlMapSelectByExampleWithoutBLOBsElementGenerated(XmlElement element,
-                                                                     IntrospectedTable introspectedTable) {
-
-        XmlElement ifPageSizeNotNullElement = new XmlElement("if");
-        ifPageSizeNotNullElement.addAttribute(new Attribute("test", "pageSize != null"));
-
-        XmlElement ifPageNumberNotNullElement = new XmlElement("if");
-        ifPageNumberNotNullElement.addAttribute(new Attribute("test", "pageNumber != null"));
-        ifPageNumberNotNullElement.addElement(new TextElement("limit ${pageSize} offset (${pageNumber}-1)*${pageSize}"));
-        
-        ifPageSizeNotNullElement.addElement(ifPageNumberNotNullElement);
-
-        XmlElement ifPageNumberNullElement = new XmlElement("if");
-        ifPageNumberNullElement.addAttribute(new Attribute("test", "pageNumber == null"));
-        ifPageNumberNullElement.addElement(new TextElement("limit ${pageSize} "));
-        
-        ifPageSizeNotNullElement.addElement(ifPageNumberNullElement);
-
-        element.addElement(ifPageSizeNotNullElement);
-
-        return true;
-    }
+//    /**
+//     * 为Mapper.xml的selectByExample添加pageSize
+//     */
+//    @Override
+//    public boolean sqlMapSelectByExampleWithoutBLOBsElementGenerated(XmlElement element,
+//                                                                     IntrospectedTable introspectedTable) {
+//
+//        XmlElement ifPageSizeNotNullElement = new XmlElement("if");
+//        ifPageSizeNotNullElement.addAttribute(new Attribute("test", "pageSize != null"));
+//
+//        XmlElement ifPageNumberNotNullElement = new XmlElement("if");
+//        ifPageNumberNotNullElement.addAttribute(new Attribute("test", "pageNumber != null"));
+//        ifPageNumberNotNullElement.addElement(new TextElement("limit ${pageSize} offset (${pageNumber}-1)*${pageSize}"));
+//        
+//        ifPageSizeNotNullElement.addElement(ifPageNumberNotNullElement);
+//
+//        XmlElement ifPageNumberNullElement = new XmlElement("if");
+//        ifPageNumberNullElement.addAttribute(new Attribute("test", "pageNumber == null"));
+//        ifPageNumberNullElement.addElement(new TextElement("limit ${pageSize} "));
+//        
+//        ifPageSizeNotNullElement.addElement(ifPageNumberNullElement);
+//
+//        element.addElement(ifPageSizeNotNullElement);
+//
+//        return true;
+//    }
 }

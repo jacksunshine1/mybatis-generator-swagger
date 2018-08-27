@@ -36,6 +36,10 @@ public class MybatisServicePlugin extends PluginAdapter {
     private FullyQualifiedJavaType returnType;
     // import lombok.extern.slf4j.Slf4j;
     private FullyQualifiedJavaType lombokSlf4jType;
+    // PageInfo<MobileCollectTask> selectPageByExample(MobileCollectTaskCriteria example);
+
+    private FullyQualifiedJavaType  pageHelperType ;
+    private FullyQualifiedJavaType  pageInfoType ;
     private String servicePack;
     private String serviceImplPack;
     private String project;
@@ -129,7 +133,9 @@ public class MybatisServicePlugin extends PluginAdapter {
         pojoCriteriaType = new FullyQualifiedJavaType(pojoUrl  + "." +tableName+"Criteria");
         listType = new FullyQualifiedJavaType("java.util.List");
         lombokSlf4jType = new FullyQualifiedJavaType("lombok.extern.slf4j.Slf4j");
-        
+        pageHelperType = new FullyQualifiedJavaType("com.github.pagehelper.PageHelper");
+        pageInfoType = new FullyQualifiedJavaType("com.github.pagehelper.PageInfo");
+
         Interface interface1 = new Interface(interfaceType);
         TopLevelClass topLevelClass = new TopLevelClass(serviceType);
         // 导入必要的类
@@ -164,6 +170,10 @@ public class MybatisServicePlugin extends PluginAdapter {
         interface1.addMethod(method);
 
         method = selectByExample(introspectedTable, tableName);
+        method.removeAllBodyLines();
+        interface1.addMethod(method);
+        
+        method = selectPageByExample(introspectedTable, tableName);
         method.removeAllBodyLines();
         interface1.addMethod(method);
 
@@ -235,6 +245,7 @@ public class MybatisServicePlugin extends PluginAdapter {
         topLevelClass.addMethod(countByExample(introspectedTable, tableName));
         topLevelClass.addMethod(selectByPrimaryKey(introspectedTable, tableName));
         topLevelClass.addMethod(selectByExample(introspectedTable, tableName));
+        topLevelClass.addMethod(selectPageByExample(introspectedTable, tableName));
 
         /**
          * type 的意义 pojo 1 ;key 2 ;example 3 ;pojo+example 4
@@ -366,6 +377,46 @@ public class MybatisServicePlugin extends PluginAdapter {
         sb.append("(");
         sb.append("example");
         sb.append(");");
+        method.addBodyLine(sb.toString());
+        return method;
+    }
+    
+    /**
+     * 添加方法
+     */
+    protected Method selectPageByExample(IntrospectedTable introspectedTable, String tableName) {
+        Method method = new Method();
+        method.setName("selectPageByExample");
+        method.setReturnType(new FullyQualifiedJavaType("PageInfo<" + tableName + ">"));
+        method.addParameter(new Parameter(pojoCriteriaType, "example"));
+        method.setVisibility(JavaVisibility.PUBLIC);
+        StringBuilder sb = new StringBuilder();
+        sb.append("PageHelper.startPage(example.getPageNumber(), example.getPageSize());");
+        method.addBodyLine(sb.toString());
+        sb.setLength(0);
+        sb.append("List<");
+        sb.append(tableName);
+        sb.append("> list = this.");
+        sb.append(getDaoShort());
+        if (introspectedTable.hasBLOBColumns()) {
+            sb.append("selectByExampleWithoutBLOBs");
+        } else {
+            sb.append("selectByExample");
+        }
+        sb.append("(");
+        sb.append("example");
+        sb.append(");");
+        method.addBodyLine(sb.toString());
+        sb.setLength(0);
+        sb.append("PageInfo<");
+        sb.append(tableName);
+        sb.append("> ");
+        sb.append("pageInfo = new PageInfo<");
+        sb.append(tableName);
+        sb.append(">(list);");
+        method.addBodyLine(sb.toString());
+        sb.setLength(0);
+        sb.append("return pageInfo;");
         method.addBodyLine(sb.toString());
         return method;
     }
@@ -585,6 +636,7 @@ public class MybatisServicePlugin extends PluginAdapter {
         interfaces.addImportedType(pojoType);
         interfaces.addImportedType(pojoCriteriaType);
         interfaces.addImportedType(listType);
+        interfaces.addImportedType(pageInfoType);
         
         topLevelClass.addImportedType(daoType);
         topLevelClass.addImportedType(interfaceType);
@@ -592,6 +644,8 @@ public class MybatisServicePlugin extends PluginAdapter {
         topLevelClass.addImportedType(pojoCriteriaType);
         topLevelClass.addImportedType(listType);
         topLevelClass.addImportedType(lombokSlf4jType);
+        topLevelClass.addImportedType(pageHelperType);
+        topLevelClass.addImportedType(pageInfoType);
         
         if (enableAnnotation) {
             topLevelClass.addImportedType(service);
