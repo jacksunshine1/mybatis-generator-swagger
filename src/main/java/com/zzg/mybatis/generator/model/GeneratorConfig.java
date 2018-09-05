@@ -45,8 +45,12 @@ public class GeneratorConfig {
 	private boolean annotation;
 
 	private boolean useActualColumnNames;
+	
+	private String virtualKeyColumns;
 
 	private String generateKeys;
+	
+	
 
 	public String getName() {
 		return name;
@@ -191,4 +195,17 @@ public class GeneratorConfig {
 	public void setGenerateKeys(String generateKeys) {
 		this.generateKeys = generateKeys;
 	}
+
+    public String getVirtualKeyColumns() {
+        return virtualKeyColumns;
+    }
+
+    public void setVirtualKeyColumns(String virtualKeyColumns) {
+        this.virtualKeyColumns = virtualKeyColumns;
+    }
+
+    
+
+    
+	
 }

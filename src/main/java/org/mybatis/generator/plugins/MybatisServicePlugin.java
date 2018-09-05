@@ -177,45 +177,48 @@ public class MybatisServicePlugin extends PluginAdapter {
         method.removeAllBodyLines();
         interface1.addMethod(method);
 
-        if (enableDeleteByPrimaryKey) {
-            method = getOtherInteger("deleteByPrimaryKey", introspectedTable, tableName, 2);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableUpdateByPrimaryKeySelective) {
-            method = getOtherInteger("updateByPrimaryKeySelective", introspectedTable, tableName, 1);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableUpdateByPrimaryKey) {
-            method = getOtherInteger("updateByPrimaryKey", introspectedTable, tableName, 1);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableDeleteByExample) {
-            method = getOtherInteger("deleteByExample", introspectedTable, tableName, 3);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableUpdateByExampleSelective) {
-            method = getOtherInteger("updateByExampleSelective", introspectedTable, tableName, 4);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableUpdateByExample) {
-            method = getOtherInteger("updateByExample", introspectedTable, tableName, 4);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableInsert) {
-            method = getOtherInsertboolean("insert", introspectedTable, tableName);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
-        }
-        if (enableInsertSelective) {
-            method = getOtherInsertboolean("insertSelective", introspectedTable, tableName);
-            method.removeAllBodyLines();
-            interface1.addMethod(method);
+        // 针对表不针对视图
+        if(tableName.toLowerCase().indexOf("view")==-1){
+            if (enableDeleteByPrimaryKey) {
+                method = getOtherInteger("deleteByPrimaryKey", introspectedTable, tableName, 2);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableUpdateByPrimaryKeySelective) {
+                method = getOtherInteger("updateByPrimaryKeySelective", introspectedTable, tableName, 1);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableUpdateByPrimaryKey) {
+                method = getOtherInteger("updateByPrimaryKey", introspectedTable, tableName, 1);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableDeleteByExample) {
+                method = getOtherInteger("deleteByExample", introspectedTable, tableName, 3);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableUpdateByExampleSelective) {
+                method = getOtherInteger("updateByExampleSelective", introspectedTable, tableName, 4);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableUpdateByExample) {
+                method = getOtherInteger("updateByExample", introspectedTable, tableName, 4);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableInsert) {
+                method = getOtherInsertboolean("insert", introspectedTable, tableName);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
+            if (enableInsertSelective) {
+                method = getOtherInsertboolean("insertSelective", introspectedTable, tableName);
+                method.removeAllBodyLines();
+                interface1.addMethod(method);
+            }
         }
         String project = context.getJavaClientGeneratorConfiguration().getTargetProject();
         GeneratedJavaFile file = new GeneratedJavaFile(interface1, project, context.getJavaFormatter());
@@ -247,33 +250,36 @@ public class MybatisServicePlugin extends PluginAdapter {
         topLevelClass.addMethod(selectByExample(introspectedTable, tableName));
         topLevelClass.addMethod(selectPageByExample(introspectedTable, tableName));
 
-        /**
-         * type 的意义 pojo 1 ;key 2 ;example 3 ;pojo+example 4
-         */
-        if (enableDeleteByPrimaryKey) {
-            topLevelClass.addMethod(getOtherInteger("deleteByPrimaryKey", introspectedTable, tableName, 2));
-        }
-        if (enableUpdateByPrimaryKeySelective) {
-            topLevelClass.addMethod(getOtherInteger("updateByPrimaryKeySelective", introspectedTable, tableName, 1));
+        
+        if(tableName.toLowerCase().indexOf("view")==-1){
+            /**
+             * type 的意义 pojo 1 ;key 2 ;example 3 ;pojo+example 4
+             */
+            if (enableDeleteByPrimaryKey) {
+                topLevelClass.addMethod(getOtherInteger("deleteByPrimaryKey", introspectedTable, tableName, 2));
+            }
+            if (enableUpdateByPrimaryKeySelective) {
+                topLevelClass.addMethod(getOtherInteger("updateByPrimaryKeySelective", introspectedTable, tableName, 1));
 
-        }
-        if (enableUpdateByPrimaryKey) {
-            topLevelClass.addMethod(getOtherInteger("updateByPrimaryKey", introspectedTable, tableName, 1));
-        }
-        if (enableDeleteByExample) {
-            topLevelClass.addMethod(getOtherInteger("deleteByExample", introspectedTable, tableName, 3));
-        }
-        if (enableUpdateByExampleSelective) {
-            topLevelClass.addMethod(getOtherInteger("updateByExampleSelective", introspectedTable, tableName, 4));
-        }
-        if (enableUpdateByExample) {
-            topLevelClass.addMethod(getOtherInteger("updateByExample", introspectedTable, tableName, 4));
-        }
-        if (enableInsert) {
-            topLevelClass.addMethod(getOtherInsertboolean("insert", introspectedTable, tableName));
-        }
-        if (enableInsertSelective) {
-            topLevelClass.addMethod(getOtherInsertboolean("insertSelective", introspectedTable, tableName));
+            }
+            if (enableUpdateByPrimaryKey) {
+                topLevelClass.addMethod(getOtherInteger("updateByPrimaryKey", introspectedTable, tableName, 1));
+            }
+            if (enableDeleteByExample) {
+                topLevelClass.addMethod(getOtherInteger("deleteByExample", introspectedTable, tableName, 3));
+            }
+            if (enableUpdateByExampleSelective) {
+                topLevelClass.addMethod(getOtherInteger("updateByExampleSelective", introspectedTable, tableName, 4));
+            }
+            if (enableUpdateByExample) {
+                topLevelClass.addMethod(getOtherInteger("updateByExample", introspectedTable, tableName, 4));
+            }
+            if (enableInsert) {
+                topLevelClass.addMethod(getOtherInsertboolean("insert", introspectedTable, tableName));
+            }
+            if (enableInsertSelective) {
+                topLevelClass.addMethod(getOtherInsertboolean("insertSelective", introspectedTable, tableName));
+            }
         }
         // 生成文件
         GeneratedJavaFile file = new GeneratedJavaFile(topLevelClass, project, context.getJavaFormatter());
@@ -495,7 +501,9 @@ public class MybatisServicePlugin extends PluginAdapter {
                     sb.append(introspectedColumn.getJavaProperty());
                     sb.append(",");
                 }
-                sb.setLength(sb.length() - 1);
+                if(sb.length()>0){
+                    sb.setLength(sb.length() - 1);
+                }
                 return sb.toString();
             case 3:
                 method.addParameter(new Parameter(pojoCriteriaType, "example"));

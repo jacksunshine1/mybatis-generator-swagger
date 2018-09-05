@@ -86,7 +86,7 @@ public class MapperPlugin extends PluginAdapter {
             FullyQualifiedJavaType exampleType = new FullyQualifiedJavaType(introspectedTable.getExampleType());
             interfaze.addImportedType(exampleType);
 
-            if (introspectedTable.getPrimaryKeyColumns() == null) {
+            if (introspectedTable.getPrimaryKeyColumns() == null||!introspectedTable.hasPrimaryKeyColumns()) {
                 interfaze.addImportedType(new FullyQualifiedJavaType("该表没设置主键"));
             } else {
                 interfaze.addImportedType(introspectedTable.getPrimaryKeyColumns().get(0).getFullyQualifiedJavaType());

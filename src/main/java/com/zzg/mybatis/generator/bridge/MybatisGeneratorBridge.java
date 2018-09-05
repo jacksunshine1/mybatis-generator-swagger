@@ -78,7 +78,10 @@ public class MybatisGeneratorBridge {
 		if (StringUtils.isNoneEmpty(generatorConfig.getGenerateKeys())) {
 			tableConfig.setGeneratedKey(new GeneratedKey(generatorConfig.getGenerateKeys(), selectedDatabaseConfig.getDbType(), true, null));
 		}
-
+		// 添加虚拟主键（多用于视图） 
+        if (StringUtils.isNoneEmpty(generatorConfig.getVirtualKeyColumns()) ) {
+            tableConfig.addProperty("virtualKeyColumns", generatorConfig.getVirtualKeyColumns());
+        }
 	
         if (generatorConfig.getMapperName() != null) {
             tableConfig.setMapperName(generatorConfig.getMapperName());
@@ -97,6 +100,8 @@ public class MybatisGeneratorBridge {
         if (generatorConfig.isUseActualColumnNames()) {
 			tableConfig.addProperty("useActualColumnNames", "true");
         }
+     
+       
        
         JDBCConnectionConfiguration jdbcConfig = new JDBCConnectionConfiguration();
         jdbcConfig.setDriverClass(DbType.valueOf(selectedDatabaseConfig.getDbType()).getDriverClass());
@@ -153,12 +158,12 @@ public class MybatisGeneratorBridge {
         context.addPluginConfiguration(exampleRenamePluginConfiguration);
         
         // 统一Mapper 接口插件
-        PluginConfiguration mapperPluginConfiguration = new PluginConfiguration();
-        mapperPluginConfiguration.addProperty("type", "org.mybatis.generator.plugins.MapperPlugin");
-        mapperPluginConfiguration.setConfigurationType("org.mybatis.generator.plugins.MapperPlugin");
-        mapperPluginConfiguration.addProperty("interfaceName", "IMapper");
-        mapperPluginConfiguration.addProperty("deleteMethod", "true");
-        context.addPluginConfiguration(mapperPluginConfiguration);
+//        PluginConfiguration mapperPluginConfiguration = new PluginConfiguration();
+//        mapperPluginConfiguration.addProperty("type", "org.mybatis.generator.plugins.MapperPlugin");
+//        mapperPluginConfiguration.setConfigurationType("org.mybatis.generator.plugins.MapperPlugin");
+//        mapperPluginConfiguration.addProperty("interfaceName", "IMapper");
+//        mapperPluginConfiguration.addProperty("deleteMethod", "true");
+//        context.addPluginConfiguration(mapperPluginConfiguration);
         // service层插件
         PluginConfiguration servicePluginConfiguration = new PluginConfiguration();
         servicePluginConfiguration.addProperty("type", "org.mybatis.generator.plugins.MybatisServicePlugin");
